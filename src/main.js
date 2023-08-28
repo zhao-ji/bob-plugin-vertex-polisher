@@ -1,18 +1,6 @@
 //@ts-check
 
 var lang = require("./lang.js");
-var ChatGPTModels = [
-    "gpt-3.5-turbo",
-    "gpt-3.5-turbo-16k",
-    "gpt-3.5-turbo-0301",
-    "gpt-3.5-turbo-0613",
-    "gpt-4",
-    "gpt-4-0314",
-    "gpt-4-0613",
-    "gpt-4-32k",
-    "gpt-4-32k-0314",
-    "gpt-4-32k-0613",
-];
 var HttpErrorCodes = {
     "400": "Bad Request",
     "401": "Unauthorized",
@@ -65,22 +53,6 @@ function ensureHttpsAndNoTrailingSlash(url) {
     const modifiedUrl = hasProtocol ? url : 'https://' + url;
 
     return modifiedUrl.endsWith('/') ? modifiedUrl.slice(0, -1) : modifiedUrl;
-}
-
-/**
- * @param {boolean} isAzureServiceProvider - Indicates if the service provider is Azure.
- * @param {string} apiKey - The authentication API key.
- * @returns {{
-*   "Content-Type": string;
-*   "api-key"?: string;
-*   "Authorization"?: string;
-* }} The header object.
-*/
-function buildHeader(isAzureServiceProvider, apiKey) {
-    return {
-        "Content-Type": "application/json",
-        [isAzureServiceProvider ? "api-key" : "Authorization"]: isAzureServiceProvider ? apiKey : `Bearer ${apiKey}`
-    };
 }
 
 /**
@@ -150,57 +122,60 @@ function replacePromptKeywords(prompt, query) {
 }
 
 /**
- * @param {typeof ChatGPTModels[number]} model
- * @param {boolean} isChatGPTModel
+ * @returns {{
+*   "Content-Type": string;
+* }} The header object.
+*/
+function buildHeader() {
+    return {
+        "Content-Type": "application/json",
+    };
+}
+
+/**
  * @param {Bob.TranslateQuery} query
  * @returns {{ 
- *  model: typeof ChatGPTModels[number];
  *  temperature: number;
- *  max_tokens: number;
+ *  candidate_count: number;
+ *  top_k: number;
  *  top_p: number;
+ *  max_output_tokens: number;
  *  frequency_penalty: number;
  *  presence_penalty: number;
- *  messages?: {
- *    role: "system" | "user";
- *    content: string;
+ *  stop_sequences: string[];
+ *  safety_settings?: {
+ *    threshold: number;
+ *    category: string;
  *  }[];
- *  prompt?: string;
+ *  prompt?: {
+ *      text: string;
+ *  };
  * }}
 */
-function buildRequestBody(model, isChatGPTModel, query) {
+function buildRequestBody(query) {
     const { customSystemPrompt, customUserPrompt, polishingMode } = $option;
     
-    const systemPrompt = generateSystemPrompt(replacePromptKeywords(customSystemPrompt, query), polishingMode, query);
-    const userPrompt = customUserPrompt ? `${replacePromptKeywords(customUserPrompt, query)}:\n\n"${query.text}"` : query.text;
+    const defaultMessage = "Rewrite the following sentence to fix grammar issues and to be more clear and enthusiastic.\n\nPlease note that you need to list the changes and briefly explain why\ninput: There going to love opening they'\''re present\noutput: They'\''re going to be so excited to open their presents!\n\nChanges and Explanation:\n1. Changed \"There\" to \"They'\''re\": The correct contraction for '\''they are'\'' is '\''they'\''re'\'', not '\''there'\''.\n2. Changed \"they'\''re\" to \"their\": In this context, the possessive pronoun '\''their'\'' should be used instead of the contraction '\''they'\''re'\''.\ninput: $text\noutput:";
+    const promptString = replacePromptKeywords(defaultMessage, query);
 
-    const standardBody = {
-        model,
-        stream: true,
-        temperature: 0.2,
-        max_tokens: 1000,
-        top_p: 1,
-        frequency_penalty: 1,
-        presence_penalty: 1,
-    };
-
-    if (isChatGPTModel) {
-        return {
-            ...standardBody,
-            messages: [
-                {
-                    role: "system",
-                    content: systemPrompt,
-                },
-                {
-                    role: "user",
-                    content: userPrompt,
-                },
-            ],
-        };
-    }
     return {
-        ...standardBody,
-        prompt: `${systemPrompt}\n\n${userPrompt}`,
+      // optional, 0.0 always uses the highest-probability result
+      temperature: 0.2,
+      // optional, how many candidate results to generate
+      candidate_count: 1,
+      // optional, number of most probable tokens to consider for generation
+      top_k: 40,
+      // optional, for nucleus sampling decoding strategy
+      top_p: 0.95,
+      // optional, maximum number of output tokens to generate
+      max_output_tokens: 1024,
+      // optional, sequences at which to stop model generation
+      stop_sequences: [],
+      // optional, safety settings
+      safety_settings: [{"category":"HARM_CATEGORY_DEROGATORY","threshold":4},{"category":"HARM_CATEGORY_TOXICITY","threshold":4},{"category":"HARM_CATEGORY_VIOLENCE","threshold":4},{"category":"HARM_CATEGORY_SEXUAL","threshold":4},{"category":"HARM_CATEGORY_MEDICAL","threshold":4},{"category":"HARM_CATEGORY_DANGEROUS","threshold":4}],
+      prompt: {
+          text: promptString
+      },
     };
 }
 
@@ -223,49 +198,36 @@ function handleError(query, result) {
 
 /**
  * @param {Bob.TranslateQuery} query
- * @param {boolean} isChatGPTModel
- * @param {string} targetText
- * @param {string} textFromResponse
+ * @param {Bob.HttpResponse.data} result
  * @returns {string}
 */
-function handleResponse(query, isChatGPTModel, targetText, textFromResponse) {
-    if (textFromResponse !== '[DONE]') {
-        try {
-            const dataObj = JSON.parse(textFromResponse);
-            const { choices } = dataObj;
-            if (!choices || choices.length === 0) {
-                query.onCompletion({
-                    error: {
-                        type: "api",
-                        message: "接口未返回结果",
-                        addtion: textFromResponse,
-                    },
-                });
-                return targetText;
-            }
-
-            const content = isChatGPTModel ? choices[0].delta.content : choices[0].text;
-            if (content !== undefined) {
-                targetText += content;
-                query.onStream({
-                    result: {
-                        from: query.detectFrom,
-                        to: query.detectTo,
-                        toParagraphs: [targetText],
-                    },
-                });
-            }
-        } catch (err) {
+function handleResponse(query, result) {
+    try {
+        // const dataObj = JSON.parse(result);
+        const { candidates } = result;
+        if (!candidates || candidates.length === 0) {
             query.onCompletion({
                 error: {
-                    type: err._type || "param",
-                    message: err._message || "Failed to parse JSON",
-                    addtion: err._addition,
+                    type: "api",
+                    message: "接口未返回结果",
+                    addtion: "",
                 },
             });
         }
+
+        const content = candidates[0].output;
+        if (content !== undefined) {
+            return content;
+        }
+    } catch (err) {
+        query.onCompletion({
+            error: {
+                type: err._type || "param",
+                message: err._message || "Failed to parse JSON",
+                addtion: err._addition,
+            },
+        });
     }
-    return targetText;
 }
 
 /**
@@ -282,90 +244,28 @@ function translate(query, completion) {
         });
     }
 
-    const { model, apiKeys, apiUrl, deploymentName } = $option;
+    const { model, apiUrl } = $option;
 
-    if (!apiKeys) {
-        completion({
-            error: {
-                type: "secretKey",
-                message: "配置错误 - 请确保您在插件配置中填入了正确的 API Keys",
-                addtion: "请在插件配置中填写 API Keys",
-            },
-        });
-    }
-    const trimmedApiKeys = apiKeys.endsWith(",") ? apiKeys.slice(0, -1) : apiKeys;
-    const apiKeySelection = trimmedApiKeys.split(",").map(key => key.trim());
-    const apiKey = apiKeySelection[Math.floor(Math.random() * apiKeySelection.length)];
-
-    const modifiedApiUrl = ensureHttpsAndNoTrailingSlash(apiUrl || "https://api.openai.com");
+    const modifiedApiUrl = ensureHttpsAndNoTrailingSlash(apiUrl || "https://vertex.minganci.org/v1beta2/models/text-bison-001:generateText");
     
-    const isChatGPTModel = ChatGPTModels.includes(model);
-    const isAzureServiceProvider = modifiedApiUrl.includes("openai.azure.com");
-    let apiUrlPath = isChatGPTModel ? "/v1/chat/completions" : "/v1/completions";
-    
-    if (isAzureServiceProvider) {
-        if (deploymentName) {
-            apiUrlPath = `/openai/deployments/${deploymentName}`;
-            apiUrlPath += isChatGPTModel ? "/chat/completions?api-version=2023-03-15-preview" : "/completions?api-version=2022-12-01";
-        } else {
-            completion({
-                error: {
-                    type: "secretKey",
-                    message: "配置错误 - 未填写 Deployment Name",
-                    addtion: "请在插件配置中填写 Deployment Name",
-                },
-            });
-        } 
-    }
-
-    const header = buildHeader(isAzureServiceProvider, apiKey);
-    const body = buildRequestBody(model, isChatGPTModel, query);
-
-    let targetText = ""; // 初始化拼接结果变量
-    let buffer = ""; // 新增 buffer 变量
+    const header = buildHeader()
+    const body = buildRequestBody(query);
     (async () => {
-        await $http.streamRequest({
+        await $http.post({
+            url: modifiedApiUrl,
             method: "POST",
-            url: modifiedApiUrl + apiUrlPath,
-            header,
-            body,
-            cancelSignal: query.cancelSignal,
-            streamHandler: (streamData) => {
-                if (streamData.text.includes("Invalid token")) {
-                    query.onCompletion({
-                        error: {
-                            type: "secretKey",
-                            message: "配置错误 - 请确保您在插件配置中填入了正确的 API Keys",
-                            addtion: "请在插件配置中填写正确的 API Keys",
-                        },
-                    });
-                } else {
-                    // 将新的数据添加到缓冲变量中
-                    buffer += streamData.text;
-                    // 检查缓冲变量是否包含一个完整的消息
-                    while (true) {
-                        const match = buffer.match(/data: (.*?})\n/);
-                        if (match) {
-                            // 如果是一个完整的消息，处理它并从缓冲变量中移除
-                            const textFromResponse = match[1].trim();
-                            targetText = handleResponse(query, isChatGPTModel, targetText, textFromResponse);
-                            buffer = buffer.slice(match[0].length);
-                        } else {
-                            // 如果没有完整的消息，等待更多的数据
-                            break;
-                        }
-                    }
-                }
-            },
+            body: body,
+            header: header,
             handler: (result) => {
                 if (result.response.statusCode >= 400) {
                     handleError(query, result);
                 } else {
+                    const content = handleResponse(query, result.data);
                     query.onCompletion({
                         result: {
                             from: query.detectFrom,
                             to: query.detectTo,
-                            toParagraphs: [targetText],
+                            toParagraphs: [content],
                         },
                     });
                 }

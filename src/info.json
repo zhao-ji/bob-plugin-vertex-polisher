@@ -1,99 +1,53 @@
 {
-  "identifier": "xyz.yetone.openai.polisher",
-  "version": "1.2.2",
+  "identifier": "zhao-ji.vertex.polisher",
   "category": "translate",
-  "name": "OpenAI Polisher",
-  "summary": "GPT powered polisher",
-  "icon": "",
-  "author": "yetone <yetoneful@gmail.com>",
-  "homepage": "https://github.com/yetone/bob-plugin-openai-polisher",
-  "appcast": "https://raw.githubusercontent.com/yetone/bob-plugin-openai-polisher/main/appcast.json",
+  "version": "0.0.1",
+  "name": "Vertex AI Polisher",
+  "summary": "Google Vertex AI powered English polisher",
+  "icon": "113",
+  "author": "Trevor <polisher@minganci.org>",
+  "homepage": "https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher",
+  "appcast": "https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/blob/main/appcast.json",
   "minBobVersion": "1.8.0",
   "options": [
     {
       "identifier": "apiUrl",
       "type": "text",
       "title": "API URL",
-      "defaultValue": "https://api.openai.com",
+      "defaultValue": "https://vertex.minganci.org/v1beta2/models/text-bison-001:generateText",
       "desc": "可选项。如果您的网络环境需要代理才能访问 OpenAI API, 可在这里修改为反代 API 的地址",
       "textConfig": {
         "type": "visible",
-        "placeholderText": "https://api.openai.com"
-      }
-    },
-    {
-      "identifier": "deploymentName",
-      "type": "text",
-      "title": "Dep. Name",
-      "desc": "可选项。此值为在部署模型时为部署选择的自定义名称，可在 Azure 门户中的 “资源管理“＞“部署“下查看",
-      "textConfig": {
-        "type": "visible"
+        "placeholderText": "https://vertex.minganci.org"
       }
     },
     {
       "identifier": "apiKeys",
       "type": "text",
       "title": "API KEY",
-      "desc": "必填项。可以用英文逗号分割多个 API KEY 以实现额度加倍及负载均衡",
+      "desc": "可选项。可以用英文逗号分割多个 API KEY 以实现额度加倍及负载均衡",
       "textConfig": {
         "type": "secure",
-        "height": "40",
-        "placeholderText": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        "placeholderText": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
       }
     },
     {
       "identifier": "model",
       "type": "menu",
       "title": "模型",
-      "defaultValue": "gpt-3.5-turbo-0613",
+      "defaultValue": "text-bison-001",
       "menuValues": [
         {
-          "title": "gpt-3.5-turbo-0613 (recommended)",
-          "value": "gpt-3.5-turbo-0613"
+          "title": "text-bison-001 (recommended)",
+          "value": "text-bison-001"
         },
         {
-          "title": "gpt-3.5-turbo-0301",
-          "value": "gpt-3.5-turbo-0301"
+          "title": "chat-bison-001",
+          "value": "chat-bison-001"
         },
         {
-          "title": "gpt-3.5-turbo-16k",
-          "value": "gpt-3.5-turbo-16k"
-        },
-        {
-          "title": "gpt-3.5-turbo",
-          "value": "gpt-3.5-turbo"
-        },
-        {
-          "title": "gpt-4",
-          "value": "gpt-4"
-        },
-        {
-          "title": "gpt-4-0314",
-          "value": "gpt-4-0314"
-        },
-        {
-          "title": "gpt-4-0613",
-          "value": "gpt-4-0613"
-        },
-        {
-          "title": "gpt-4-32k",
-          "value": "gpt-4-32k"
-        },
-        {
-          "title": "gpt-4-32k-0314",
-          "value": "gpt-4-32k-0314"
-        },
-        {
-          "title": "gpt-4-32k-0613",
-          "value": "gpt-4-32k-0613"
-        },
-        {
-          "title": "text-davinci-003",
-          "value": "text-davinci-003"
-        },
-        {
-          "title": "text-davinci-002",
-          "value": "text-davinci-002"
+          "title": "embedding-gecko-001",
+          "value": "embedding-gecko-001"
         }
       ]
     },
@@ -107,23 +61,6 @@
         "type": "visible",
         "height": "100",
         "placeholderText": "Revise the following sentences to make them more clear, concise, and coherent.",
-        "keyWords": [
-          "$text",
-          "$sourceLang",
-          "$targetLang"
-        ]
-      }
-    },
-    {
-      "identifier": "customUserPrompt",
-      "type": "text",
-      "title": "用户指令",
-      "defaultValue": "$text",
-      "desc": "可选项。自定义 User Prompt，填写则会覆盖默认的 User Prompt，默认值为`$text`（即翻译窗口输入框内的文本）\n\n自定义 Prompt 中可以使用与系统指令中相同的变量",
-      "textConfig": {
-        "type": "visible",
-        "height": "100",
-        "placeholderText": "$text",
         "keyWords": [
           "$text",
           "$sourceLang",
