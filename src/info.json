@@ -14,18 +14,18 @@
       "identifier": "apiUrl",
       "type": "text",
       "title": "API URL",
-      "defaultValue": "https://vertex.minganci.org/v1beta2/models/text-bison-001:generateText",
-      "desc": "可选项。如果您的网络环境需要代理才能访问 OpenAI API, 可在这里修改为反代 API 的地址",
+      "defaultValue": "https://vertex.minganci.org/v1beta3/models/$model?key=$key",
+      "desc": "可选项。如果您的网络环境需要代理才能访问 Vertex API, 可在这里修改为反代 API 的地址",
       "textConfig": {
         "type": "visible",
         "placeholderText": "https://vertex.minganci.org"
       }
     },
     {
-      "identifier": "apiKeys",
+      "identifier": "apiKey",
       "type": "text",
       "title": "API KEY",
-      "desc": "可选项。可以用英文逗号分割多个 API KEY 以实现额度加倍及负载均衡",
+      "desc": "可选项。API 密钥。",
       "textConfig": {
         "type": "secure",
         "placeholderText": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -35,38 +35,17 @@
       "identifier": "model",
       "type": "menu",
       "title": "模型",
-      "defaultValue": "text-bison-001",
+      "defaultValue": "text-bison-001:generateText",
       "menuValues": [
         {
           "title": "text-bison-001 (recommended)",
-          "value": "text-bison-001"
+          "value": "text-bison-001:generateText"
         },
         {
           "title": "chat-bison-001",
-          "value": "chat-bison-001"
-        },
-        {
-          "title": "embedding-gecko-001",
-          "value": "embedding-gecko-001"
+          "value": "chat-bison-001:generateMessage"
         }
       ]
-    },
-    {
-      "identifier": "customSystemPrompt",
-      "type": "text",
-      "title": "系统指令",
-      "defaultValue": "Revise the following sentences to make them more clear, concise, and coherent.",
-      "desc": "可选项。自定义 System Prompt，填写则会覆盖默认的 System Prompt。自定义 Prompt可使用以下变量：\n\n`$text` - 需要润色的文本，即翻译窗口输入框内的文本 `$sourceLang` - 原文语言，即翻译窗口输入框内文本的语言，比如「简体中文」\n\n`$targetLang` - 目标语言，可以在翻译窗口中手动选择或自动检测，比如「English」",
-      "textConfig": {
-        "type": "visible",
-        "height": "100",
-        "placeholderText": "Revise the following sentences to make them more clear, concise, and coherent.",
-        "keyWords": [
-          "$text",
-          "$sourceLang",
-          "$targetLang"
-        ]
-      }
     },
     {
       "identifier": "polishingMode",
@@ -83,6 +62,44 @@
           "value": "detailed"
         }
       ]
+    },
+    {
+      "identifier": "customSystemPrompt",
+      "type": "text",
+      "title": "系统指令",
+      "desc": "可选项。自定义 System Prompt，填写则会覆盖默认的 System Prompt。自定义 Prompt可使用以下变量：\n\n`$text` - 需要润色的文本，即翻译窗口输入框内的文本 `$sourceLang` - 原文语言，即翻译窗口输入框内文本的语言，比如「简体中文」\n\n`$targetLang` - 目标语言，可以在翻译窗口中手动选择或自动检测，比如「English」",
+      "textConfig": {
+        "type": "visible",
+        "height": "100",
+        "placeholderText": "Revise the following sentences to make them more clear, concise, and coherent.",
+        "keyWords": [
+          "$text",
+          "$sourceLang",
+          "$targetLang"
+        ]
+      }
+    },
+    {
+      "identifier": "exampleInput",
+      "type": "text",
+      "title": "输入示例",
+      "desc": "可选项",
+      "textConfig": {
+        "type": "visible",
+        "height": "100",
+        "placeholderText": "Trees is happy."
+      }
+    },
+    {
+      "identifier": "exampleOutput",
+      "type": "text",
+      "title": "输出示例",
+      "desc": "可选项, 当使用 chat-bison-001 mode 时可以填写",
+      "textConfig": {
+        "type": "visible",
+        "height": "100",
+        "placeholderText": "Trees are happy."
+      }
     }
   ]
 }

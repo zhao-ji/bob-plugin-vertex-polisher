@@ -122,60 +122,159 @@ function replacePromptKeywords(prompt, query) {
 }
 
 /**
- * @returns {{
-*   "Content-Type": string;
-* }} The header object.
+ * @returns {string}
 */
-function buildHeader() {
+function buildAPIUrl() {
+    const { apiUrl, model, apiKey } = $option;
+    if (!model) return apiUrl;
+    return apiUrl
+        .replace("$model", model)
+        .replace("$key", apiKey);
+}
+
+/**
+ * @param {Bob.TranslateQuery} query
+ * @returns {{ 
+ *  prompt?: {
+ *      text: string;
+ *  };
+ *  safetySettings?: {
+ *    threshold: number;
+ *    category: string;
+ *  }[];
+ *  stopSequences: string[];
+ *  temperature: number;
+ *  candidateCount: number;
+ *  maxOutputTokens: number;
+ * }}
+*/
+function buildTextRequestBody(query) {
+    const { customSystemPrompt, polishingMode } = $option;
+    
+    const defaultSimplePrompt = `
+        Rewrite the following sentence to fix grammar issues and to be more clear and enthusiastic.
+
+        Example:
+            input:
+                There going to love opening they're present!
+            output:
+                They're going to be so excited to open their presents!
+
+        input: $text
+        output:
+    `;
+    const defaultDetailedPrompt = `
+        Rewrite the following sentence to fix grammar issues and to be more clear and enthusiastic.
+        Please note that you need to list the changes and briefly explain why.
+
+
+        Example:
+
+            input:
+
+                There going to love opening they're present
+
+            output:
+
+                They're going to be so excited to open their presents!
+                Changes and Explanation:
+                    1. Changed "There" to "They're": The correct contraction for 'they are' is 'they're', not 'there'.
+                    2. Changed "they're" to "their": In this context, the possessive pronoun 'their' should be used instead of the contraction 'they're'.
+
+        input:
+            $text
+        output:
+    `;
+
+    const promptString = replacePromptKeywords(
+        customSystemPrompt || (polishingMode === "simplicity" ? defaultSimplePrompt : defaultDetailedPrompt),
+        query
+    );
+
     return {
-        "Content-Type": "application/json",
+        prompt: {
+            text: promptString,
+        },
+        // optional, safety settings
+        safetySettings: [
+            {"category":"HARM_CATEGORY_DEROGATORY","threshold":"BLOCK_NONE"},
+            {"category":"HARM_CATEGORY_TOXICITY","threshold":"BLOCK_NONE"},
+            {"category":"HARM_CATEGORY_VIOLENCE","threshold":"BLOCK_NONE"},
+            {"category":"HARM_CATEGORY_SEXUAL","threshold":"BLOCK_NONE"},
+            {"category":"HARM_CATEGORY_MEDICAL","threshold":"BLOCK_NONE"},
+            {"category":"HARM_CATEGORY_DANGEROUS","threshold":"BLOCK_NONE"}
+        ],
+        // optional, sequences at which to stop model generation
+        stopSequences: [],
+        // optional, 0.0 always uses the highest-probability result
+        temperature: 0.2,
+        // optional, how many candidate results to generate
+        candidateCount: 1,
+        // optional, maximum number of output tokens to generate
+        maxOutputTokens: 10240,
     };
 }
 
 /**
  * @param {Bob.TranslateQuery} query
  * @returns {{ 
- *  temperature: number;
- *  candidate_count: number;
- *  top_k: number;
- *  top_p: number;
- *  max_output_tokens: number;
- *  frequency_penalty: number;
- *  presence_penalty: number;
- *  stop_sequences: string[];
- *  safety_settings?: {
- *    threshold: number;
- *    category: string;
- *  }[];
  *  prompt?: {
- *      text: string;
+ *      context: string;
+ *      examples?: []example{
+ *          content: string;
+ *      };
+ *      messages?: Array<Messages>;
  *  };
+ *  temperature: number;
+ *  candidateCount: number;
  * }}
 */
-function buildRequestBody(query) {
-    const { customSystemPrompt, customUserPrompt, polishingMode } = $option;
+function buildChatRequestBody(query) {
+    const { customSystemPrompt, polishingMode, exampleInput, exampleOutput } = $option;
     
-    const defaultMessage = "Rewrite the following sentence to fix grammar issues and to be more clear and enthusiastic.\n\nPlease note that you need to list the changes and briefly explain why\ninput: There going to love opening they'\''re present\noutput: They'\''re going to be so excited to open their presents!\n\nChanges and Explanation:\n1. Changed \"There\" to \"They'\''re\": The correct contraction for '\''they are'\'' is '\''they'\''re'\'', not '\''there'\''.\n2. Changed \"they'\''re\" to \"their\": In this context, the possessive pronoun '\''their'\'' should be used instead of the contraction '\''they'\''re'\''.\ninput: $text\noutput:";
-    const promptString = replacePromptKeywords(defaultMessage, query);
+    const defaultSimpleContext = "Rewrite the following sentence to fix grammar issues and to be more clear and enthusiastic.";
+    const defaultDetailedContext = `
+        Rewrite the following sentence to fix grammar issues and to be more clear and enthusiastic.
+        Please note that you need to list the changes and briefly explain why.
+    `;
+    const defaultSimpleExamples = {
+        input: {
+            content: exampleInput || "There going to love opening they're present!",
+        },
+        output: {
+            content: exampleOutput || "They're going to be so excited to open their presents!"
+        }
+    };
+    const defaultDetailedExamples = {
+        input: {
+            content: exampleInput || "There going to love opening they're present!"
+        },
+        output: {
+            content: exampleOutput || `
+                They're going to be so excited to open their presents!
+                Changes and Explanation:
+                    1. Changed "There" to "They're": The correct contraction for 'they are' is 'they're', not 'there'.
+                    2. Changed "they're" to "their": In this context, the possessive pronoun 'their' should be used instead of the contraction 'they're'.
+            `
+        }
+    };
+    const messages = [{
+        content: query.text,
+    }];
+
+    const context = customSystemPrompt || (polishingMode === "simplicity" ? defaultSimpleContext: defaultDetailedContext);
+    const examples = (polishingMode === "simplicity" ? defaultSimpleExamples: defaultDetailedExamples);
 
     return {
-      // optional, 0.0 always uses the highest-probability result
-      temperature: 0.2,
-      // optional, how many candidate results to generate
-      candidate_count: 1,
-      // optional, number of most probable tokens to consider for generation
-      top_k: 40,
-      // optional, for nucleus sampling decoding strategy
-      top_p: 0.95,
-      // optional, maximum number of output tokens to generate
-      max_output_tokens: 1024,
-      // optional, sequences at which to stop model generation
-      stop_sequences: [],
-      // optional, safety settings
-      safety_settings: [{"category":"HARM_CATEGORY_DEROGATORY","threshold":4},{"category":"HARM_CATEGORY_TOXICITY","threshold":4},{"category":"HARM_CATEGORY_VIOLENCE","threshold":4},{"category":"HARM_CATEGORY_SEXUAL","threshold":4},{"category":"HARM_CATEGORY_MEDICAL","threshold":4},{"category":"HARM_CATEGORY_DANGEROUS","threshold":4}],
-      prompt: {
-          text: promptString
-      },
+        prompt: {
+            context: context,
+            examples: examples,
+            messages: messages,
+        },
+        // optional, 0.0 always uses the highest-probability result
+        temperature: 0.7,
+        // optional, how many candidate results to generate
+        candidateCount: 1,
     };
 }
 
@@ -198,12 +297,12 @@ function handleError(query, result) {
 
 /**
  * @param {Bob.TranslateQuery} query
- * @param {Bob.HttpResponse.data} result
+ * @param {Bob.HttpResponse} result
+ * @param string polishingMode 
  * @returns {string}
 */
-function handleResponse(query, result) {
+function handleResponse(query, result, model) {
     try {
-        // const dataObj = JSON.parse(result);
         const { candidates } = result;
         if (!candidates || candidates.length === 0) {
             query.onCompletion({
@@ -215,7 +314,12 @@ function handleResponse(query, result) {
             });
         }
 
-        const content = candidates[0].output;
+        var content;
+        if (model === "text-bison-001:generateText") {
+            content = candidates[0].output;
+        } else if (model === "chat-bison-001:generateMessage") {
+            content = candidates[0].content;
+        }
         if (content !== undefined) {
             return content;
         }
@@ -244,23 +348,26 @@ function translate(query, completion) {
         });
     }
 
-    const { model, apiUrl } = $option;
+    const { model } = $option;
+    const modifiedApiUrl = ensureHttpsAndNoTrailingSlash(buildAPIUrl());
 
-    const modifiedApiUrl = ensureHttpsAndNoTrailingSlash(apiUrl || "https://vertex.minganci.org/v1beta2/models/text-bison-001:generateText");
-    
-    const header = buildHeader()
-    const body = buildRequestBody(query);
-    (async () => {
+    var body;
+    if (model === "text-bison-001:generateText") {
+        body = buildTextRequestBody(query);
+    } else if (model === "chat-bison-001:generateMessage") {
+        body = buildChatRequestBody(query);
+    }
+
+    (async (model) => {
         await $http.post({
             url: modifiedApiUrl,
             method: "POST",
             body: body,
-            header: header,
             handler: (result) => {
                 if (result.response.statusCode >= 400) {
                     handleError(query, result);
                 } else {
-                    const content = handleResponse(query, result.data);
+                    const content = handleResponse(query, result.data, model);
                     query.onCompletion({
                         result: {
                             from: query.detectFrom,
@@ -271,7 +378,7 @@ function translate(query, completion) {
                 }
             }
         });
-    })().catch((err) => {
+    })(model).catch((err) => {
         completion({
             error: {
                 type: err._type || "unknown",
