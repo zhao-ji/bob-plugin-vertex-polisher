@@ -1,7 +1,7 @@
 {
   "identifier": "zhao-ji.vertex.polisher",
   "category": "translate",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "name": "Vertex AI Polisher",
   "summary": "Google Vertex AI powered English polisher",
   "icon": "113",
@@ -14,11 +14,11 @@
       "identifier": "apiUrl",
       "type": "text",
       "title": "API URL",
-      "defaultValue": "https://vertex.minganci.org/v1beta3/models/$model?key=$key",
-      "desc": "可选项。如果您的网络环境需要代理才能访问 Vertex API, 可在这里修改为反代 API 的地址",
+      "defaultValue": "https://vertex.minganci.org/v1beta3/models/$model",
+      "desc": "可选项。如果您的网络环境需要代理才能访问 Vertex API, 可在这里修改为反代 API 的地址。比如：https://vertex.minganci.org/v1beta3/models/$model?key=$key , 使用 $key 设定自己的密钥。",
       "textConfig": {
         "type": "visible",
-        "placeholderText": "https://vertex.minganci.org"
+        "placeholderText": "https://vertex.minganci.org/v1beta3/models/$model"
       }
     },
     {

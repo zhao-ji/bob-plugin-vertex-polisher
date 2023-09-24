@@ -22,7 +22,7 @@ def update_appcast(version, desc):
         with open(appcast_file, 'r') as f:
             appcast = json.load(f)
     else:
-        appcast = dict(identifier='yetone.openai.polisher', versions=[])
+        appcast = dict(identifier='zhao-ji.vertex.polisher', versions=[])
     appcast['versions'].insert(0, version_info)
     with open(appcast_file, 'w') as f:
         json.dump(appcast, f, ensure_ascii=False, indent=2)

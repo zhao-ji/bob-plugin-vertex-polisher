@@ -30,7 +30,7 @@ Creating this Bob plugin for language refinement and grammar correction. The eff
 
 ## Usage
 
-1. Install [Bob](https://bobtranslate.com/guide/#%E5%AE%89%E8%A3%85), a translation and OCR software for macOS platform; [openai-translator.bobplugin](https://github.com/yetone/bob-plugin-openai-translator/releases/latest) >= **1.0.0** enables streaming output by default after installation, requiring Bob version >= **1.8.0**.
+1. Install [Bob](https://bobtranslate.com/guide/#%E5%AE%89%E8%A3%85), a translation and OCR software for macOS platform
 
 2. Download this plugin: [vertex-ai-polisher.bobplugin](https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/releases/latest)
 

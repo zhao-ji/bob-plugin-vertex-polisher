@@ -2,18 +2,11 @@
   "identifier": "zhao-ji.vertex.polisher",
   "versions": [
     {
-      "version": "0.0.1",
-      "desc": "First version of polisher.",
-      "sha256": "082b46af7a97002211b78301ad720d4cf7ca7087dc7340dd8502aba65760f090",
-      "url": "https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/releases/download/v0.0.1/vertex-polisher-0.0.1.bobplugin",
+      "version": "0.1.0",
+      "desc": "Add api key configuration and user defined prompt for Vertex AI.",
+      "sha256": "2b32cf6149da9abd9792ed1ffbf6f1fa4a36af2c471c30297fd1b0ade167fb1e",
+      "url": "https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/releases/download/v0.1.0/vertex-polisher-0.1.0.bobplugin",
       "minBobVersion": "1.8.0"
-    },
-    {
-      "version": "0.0.1",
-      "desc": "release v0.0.1!",
-      "sha256": "0b3f7dc3f8bfcb08c090d0abd3809421172ac7e04a95c602f7bae2fa4d37160b",
-      "url": "https://github.com/yetone/bob-plugin-openai-polisher/releases/download/v0.0.1/openai-polisher-0.0.1.bobplugin",
-      "minBobVersion": "0.5.0"
     }
   ]
 }

@@ -28,9 +28,9 @@
 
 ## 使用方法
 
-1. 安装 [Bob](https://bobtranslate.com/guide/#%E5%AE%89%E8%A3%85)，一款 macOS 平台的翻译和 OCR 软件；[openai-translator.bobplugin](https://github.com/yetone/bob-plugin-openai-translator/releases/latest) >= **1.0.0** 以后默认开启流式输出，需要 Bob 版本 >= **1.8.0**
+1. 安装 [Bob](https://bobtranslate.com/guide/#%E5%AE%89%E8%A3%85)，一款 macOS 平台的翻译和 OCR 软件
 
-2. 下载此插件: [vertex-ai-polisher.bobplugin](https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/releases)
+2. 下载此插件: [vertex-ai-polisher.bobplugin](https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/releases/latest)
 
 3. 安装此插件:
   ![安装步骤](https://user-images.githubusercontent.com/1206493/222712959-4a4b27e2-b129-408a-a8af-24a3a89df2dd.gif)

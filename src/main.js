@@ -46,7 +46,7 @@ var HttpErrorCodes = {
 
 /**
  * @param {string}  url
- * @returns {string} 
+ * @returns {string}
 */
 function ensureHttpsAndNoTrailingSlash(url) {
     const hasProtocol = /^[a-z]+:\/\//i.test(url);
@@ -134,7 +134,7 @@ function buildAPIUrl() {
 
 /**
  * @param {Bob.TranslateQuery} query
- * @returns {{ 
+ * @returns {{
  *  prompt?: {
  *      text: string;
  *  };
@@ -150,9 +150,9 @@ function buildAPIUrl() {
 */
 function buildTextRequestBody(query) {
     const { customSystemPrompt, polishingMode } = $option;
-    
+
     const defaultSimplePrompt = `
-        Rewrite the following sentence to fix grammar issues and to be more clear and enthusiastic.
+        Revise the following sentences to make them more clear, concise, and coherent.
 
         Example:
             input:
@@ -164,19 +164,15 @@ function buildTextRequestBody(query) {
         output:
     `;
     const defaultDetailedPrompt = `
-        Rewrite the following sentence to fix grammar issues and to be more clear and enthusiastic.
+        Revise the following sentences to make them more clear, concise, and coherent.
         Please note that you need to list the changes and briefly explain why.
 
 
         Example:
-
             input:
-
                 There going to love opening they're present
-
             output:
-
-                They're going to be so excited to open their presents!
+                They're going to be so excited to open their presents! \n
                 Changes and Explanation:
                     1. Changed "There" to "They're": The correct contraction for 'they are' is 'they're', not 'there'.
                     2. Changed "they're" to "their": In this context, the possessive pronoun 'their' should be used instead of the contraction 'they're'.
@@ -217,7 +213,7 @@ function buildTextRequestBody(query) {
 
 /**
  * @param {Bob.TranslateQuery} query
- * @returns {{ 
+ * @returns {{
  *  prompt?: {
  *      context: string;
  *      examples?: []example{
@@ -231,10 +227,15 @@ function buildTextRequestBody(query) {
 */
 function buildChatRequestBody(query) {
     const { customSystemPrompt, polishingMode, exampleInput, exampleOutput } = $option;
-    
-    const defaultSimpleContext = "Rewrite the following sentence to fix grammar issues and to be more clear and enthusiastic.";
+
+
+    const defaultSimpleContext = `
+        Revise the following sentences to make them more clear, concise, and coherent.
+        Do not add any content or symbols that does not exist in the original text.
+    `;
     const defaultDetailedContext = `
-        Rewrite the following sentence to fix grammar issues and to be more clear and enthusiastic.
+        Revise the following sentences to make them more clear, concise, and coherent.
+        Do not add any content or symbols that does not exist in the original text.
         Please note that you need to list the changes and briefly explain why.
     `;
     const defaultSimpleExamples = {
@@ -272,7 +273,7 @@ function buildChatRequestBody(query) {
             messages: messages,
         },
         // optional, 0.0 always uses the highest-probability result
-        temperature: 0.7,
+        temperature: 0,
         // optional, how many candidate results to generate
         candidateCount: 1,
     };
@@ -298,7 +299,7 @@ function handleError(query, result) {
 /**
  * @param {Bob.TranslateQuery} query
  * @param {Bob.HttpResponse} result
- * @param string polishingMode 
+ * @param string polishingMode
  * @returns {string}
 */
 function handleResponse(query, result, model) {
@@ -362,6 +363,9 @@ function translate(query, completion) {
         await $http.post({
             url: modifiedApiUrl,
             method: "POST",
+            header: {
+                "Content-Type": "application/json",
+            },
             body: body,
             handler: (result) => {
                 if (result.response.statusCode >= 400) {
