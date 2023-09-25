@@ -5,16 +5,16 @@
 <div>
   <h1 align="center">Google Vertex AI Polisher Bob Plugin</h1>
   <p align="center">
-    <a href="https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/releases" target="_blank">
-        <img src="https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/actions/workflows/release.yaml/badge.svg" alt="release">
+    <a href="https://github.com/zhao-ji/bob-plugin-vertex-polisher/releases" target="_blank">
+        <img src="https://github.com/zhao-ji/bob-plugin-vertex-polisher/actions/workflows/release.yaml/badge.svg" alt="release">
     </a>
-    <a href="https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/releases">
-        <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/zhao-ji/bob-plugin-vertex-ai-polisher?style=flat">
+    <a href="https://github.com/zhao-ji/bob-plugin-vertex-polisher/releases">
+        <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/zhao-ji/bob-plugin-vertex-polisher?style=flat">
     </a>
-    <a href="https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/releases">
+    <a href="https://github.com/zhao-ji/bob-plugin-vertex-polisher/releases">
         <img alt="GitHub Repo stars" src="https://img.shields.io/badge/OpenAI-Bob-brightgreen?style=flat">
     </a>
-    <a href="https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/releases">
+    <a href="https://github.com/zhao-ji/bob-plugin-vertex-polisher/releases">
         <img alt="GitHub Repo stars" src="https://img.shields.io/badge/Langurage-JavaScript-brightgreen?style=flat&color=blue">
     </a>
   </p>
@@ -32,7 +32,7 @@ Creating this Bob plugin for language refinement and grammar correction. The eff
 
 1. Install [Bob](https://bobtranslate.com/guide/#%E5%AE%89%E8%A3%85), a translation and OCR software for macOS platform
 
-2. Download this plugin: [vertex-ai-polisher.bobplugin](https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/releases/latest)
+2. Download this plugin: [vertex-polisher.bobplugin](https://github.com/zhao-ji/bob-plugin-vertex-polisher/releases/latest)
 
 3. Install this plugin:
   ![Installation Steps](https://user-images.githubusercontent.com/1206493/222712959-4a4b27e2-b129-408a-a8af-24a3a89df2dd.gif)

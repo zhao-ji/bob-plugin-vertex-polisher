@@ -1,13 +1,13 @@
 {
   "identifier": "zhao-ji.vertex.polisher",
   "category": "translate",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "Vertex AI Polisher",
   "summary": "Google Vertex AI powered English polisher",
   "icon": "113",
   "author": "Trevor <polisher@minganci.org>",
-  "homepage": "https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher",
-  "appcast": "https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/blob/main/appcast.json",
+  "homepage": "https://github.com/zhao-ji/bob-plugin-vertex-polisher",
+  "appcast": "https://github.com/zhao-ji/bob-plugin-vertex-polisher/blob/main/appcast.json",
   "minBobVersion": "1.8.0",
   "options": [
     {

@@ -14,7 +14,7 @@ def update_appcast(version, desc):
         'version': version,
         'desc': desc,
         'sha256': file_hash,
-        'url': f'https://github.com/zhao-ji/bob-plugin-vertex-ai-polisher/releases/download/v{version}/{release_file.name}',
+        'url': f'https://github.com/zhao-ji/bob-plugin-vertex-polisher/releases/download/v{version}/{release_file.name}',
         'minBobVersion': '1.8.0'
     }
     appcast_file = Path('appcast.json')
